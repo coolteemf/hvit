@@ -20,8 +20,6 @@ def read_yaml_file(file_path):
         except yaml.YAMLError as e:
             print(f"Error reading YAML file: {e}")
             return None
-
-
 class Logger:
     def __init__(self, save_dir):
         self.logger = logging.getLogger(__name__)

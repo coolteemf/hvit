@@ -1,7 +1,5 @@
-import sys, os
+import os
 from pathlib import Path
-sys.path.append(str(Path(__file__).resolve().parent.parent.parent))
-
 
 import argparse
 import wandb
@@ -12,10 +10,10 @@ from lightning.pytorch.loggers import WandbLogger
 # Add this line after the imports
 torch.set_float32_matmul_precision('medium')
 
-from src import logger
-from src.trainer import LiTHViT
-from src.utils import read_yaml_file
-from src.data.datasets import get_dataloader
+from hvit import logger
+from hvit.trainer import LiTHViT
+from hvit.utils import read_yaml_file
+from hvit.data.datasets import get_dataloader
 
 
 def parse_arguments():
@@ -123,3 +121,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

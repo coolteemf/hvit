@@ -2,11 +2,11 @@ import math
 import torch
 from lightning import LightningModule
 
-from src import logger, checkpoints_dir
-from src.model.hvit import HViT
-from src.model.hvit_light import HViT_Light
-from src.loss import loss_functions, DiceScore
-from src.utils import get_one_hot
+from hvit import logger, checkpoints_dir
+from hvit.model.hvit import HViT
+from hvit.model.hvit_light import HViT_Light
+from hvit.loss import loss_functions, DiceScore
+from hvit.utils import get_one_hot
 
 dtype_map = {
     'bf16': torch.bfloat16,
@@ -237,49 +237,5 @@ class LiTHViT(LightningModule):
         """
         checkpoint = torch.load(checkpoint_path, map_location='cpu')
         
-        args = args or checkpoint.get('hyper_parameters', {}).get('args')
-        config = checkpoint.get('hyper_parameters', {}).get('config')
         
-        model = cls(args, config, wandb_logger)
-        model.load_state_dict(checkpoint['state_dict'])
-
-        if 'hyper_parameters' in checkpoint:
-            hyper_params = checkpoint['hyper_parameters']
-            for attr in ['lr', 'best_val_loss', 'last_epoch']:
-                setattr(model, attr, hyper_params.get(attr, getattr(model, attr)))
-
-        return model
-
-    def on_save_checkpoint(self, checkpoint):
-        """
-        Callback to save additional information in the checkpoint.
-        
-        Args:
-            checkpoint: The checkpoint dictionary to be saved.
-        """
-        checkpoint['hyper_parameters'] = {
-            'config': self.config,
-            'lr': self.lr,
-            'best_val_loss': self.best_val_loss,
-            'last_epoch': self.current_epoch
-        }
-
-    def _get_one_hot_from_src(self, src_seg, flow, num_labels):
-        """
-        Converts source segmentation to one-hot encoding and applies deformation.
-        
-        Args:
-            src_seg: Source segmentation.
-            flow: Deformation flow.
-            num_labels: Number of segmentation labels.
-        
-        Returns:
-            Deformed one-hot encoded segmentation.
-        """
-        src_seg_onehot = get_one_hot(src_seg, self.args.num_labels)
-        deformed_segs = [
-            self.hvit.spatial_trans(src_seg_onehot[:, i:i+1, ...].float(), flow.float())
-            for i in range(num_labels)
-        ]
-        return torch.cat(deformed_segs, dim=1)
 
